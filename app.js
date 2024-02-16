@@ -32,18 +32,13 @@ app.use(function(req, res, next) {
 
 app.use(
   responseTime((req, res, time) => {
-    if (req?.route?.path) {
-      restResponseTimeHistogram.observe
-      (
-        {
+      restResponseTimeHistogram.labels
+      ({
           method: req.method,
           route: req.route.path,
           status_code: res.statusCode
-        },
-        time * 1000
-      )
-    }
-  })
+        }).observe(time)
+     })
   )
 
 
