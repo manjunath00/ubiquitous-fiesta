@@ -16,6 +16,17 @@ var app = express();
 // app.set('views', path.join(__dirname, 'views'));
 // app.set('view engine', 'jade');
 
+app.use(
+  responseTime((req, res, time) => {
+      restResponseTimeHistogram.labels
+      ({
+          method: req.method,
+          route: req.route.path,
+          status_code: res.statusCode
+        }).observe(time)
+     })
+  )
+
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -30,16 +41,7 @@ app.use(function(req, res, next) {
   next(createError(404));
 });
 
-app.use(
-  responseTime((req, res, time) => {
-      restResponseTimeHistogram.labels
-      ({
-          method: req.method,
-          route: req.route.path,
-          status_code: res.statusCode
-        }).observe(time)
-     })
-  )
+
 
 
 const port = 2000;
