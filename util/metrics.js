@@ -3,16 +3,24 @@ const client = require('prom-client');
 
 const app = express();
 
+const collectDefaultMetrics = client.collectDefaultMetrics;
+const Registry = client.Registry;
+const registry = new Registry();
+
+registry.setDefaultLabels({
+    app: "technology demostrator"
+})
+
  const restResponseTimeHistogram = new client.Histogram({
     name: 'rest_response_time_duration_seconds',
     help: 'REST API Response in seconds',
     labelNames: ['method', 'route', 'status_code']
 });
 
- function startMetricServer() {
-    const collectDefaultMetrics = client.collectDefaultMetrics;
+registry.registerMetric(restResponseTimeHistogram);
 
-    collectDefaultMetrics();
+function startMetricServer() {
+    collectDefaultMetrics({ registry });
 
     app.get('/metrics', async (req, res) => {
         res.set('Content-Type', client.register.contentType);
